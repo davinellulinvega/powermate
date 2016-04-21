@@ -19,7 +19,7 @@ class PowerMate(powermate.PowerMateBase):
             sinks = pulse.sink_input_list()
             for sink in sinks:
                 if sink.mute == 0:
-                    pulse.volume_change_all_chans(sink, rotation * 0.01)
+                    pulse.volume_change_all_chans(sink, rotation * 0.005)
 
 if __name__ == '__main__':
     try:
