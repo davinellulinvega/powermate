@@ -3,19 +3,27 @@
 from __future__ import division
 
 import glob
-
-import pactl
 import powermate
+from pulsectl import Pulse
 
 
 class PowerMate(powermate.PowerMateBase):
-  def rotate(self, rotation):
-    sink = pactl.active_sink()
-    if sink:
-      volume = sink.inc_volume(rotation)
-      return powermate.LedEvent.percent(volume / 100)
+    def rotate(self, rotation):
+        """
+        Simply get the list of available sinks
+        :param rotation: The direction of rotation. (left = -1, right = 1)
+        :return:
+        """
 
+        with Pulse('volume-increaser') as pulse:
+            sinks = pulse.sink_input_list()
+            for sink in sinks:
+                if sink.mute == 0:
+                    pulse.volume_change_all_chans(sink, rotation * 0.05)
 
 if __name__ == '__main__':
-  pm = PowerMate(glob.glob('/dev/input/by-id/*PowerMate*')[0])
-  pm.run()
+    try:
+        pm = PowerMate(glob.glob('/dev/input/powermate')[0])
+        pm.run()
+    except KeyboardInterrupt:
+        pass
