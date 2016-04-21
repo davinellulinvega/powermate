@@ -15,7 +15,7 @@ class PowerMate(powermate.PowerMateBase):
         :return:
         """
 
-        with Pulse('volume-increaser') as pulse:
+        with Pulse(client_name='volume-increaser', threading_lock=True) as pulse:
             sinks = pulse.sink_input_list()
             for sink in sinks:
                 if sink.mute == 0:
