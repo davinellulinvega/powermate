@@ -296,13 +296,7 @@ class ExamplePowerMate(PowerMateBase):
         print('Push rotate {}!'.format(rotation))
 
 
-class ExampleBadHandler(PowerMateEventHandler):
-    def rotate(self, rotation):
-        import time
-        time.sleep(1)
-
-
 if __name__ == "__main__":
-    pm = ExamplePowerMate(glob.glob('/dev/input/by-id/*PowerMate*')[0])
-    pm.add_listener(ExampleBadHandler())
+    pm = ExamplePowerMate(glob.glob('/dev/input/*powermate*')[0])
+    print(glob.glob('/dev/input/*powermate*'))
     pm.run()
