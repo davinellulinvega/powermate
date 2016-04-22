@@ -18,7 +18,7 @@ class Dispatcher(pm.PowerMateBase):
         Initialize the super class and define the local members
         :param path: The path to the powermate device
         """
-        super(Dispatcher, self).__init__(path)
+        super(Dispatcher, self).__init__(path, long_threshold=500)
         self._pulsing = False
         self._brightness = pm.MAX_BRIGHTNESS
         self._scroll = False
