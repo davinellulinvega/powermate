@@ -5,6 +5,7 @@ import powermate as pm
 from Pulseaudio import Pulseaudio
 from Clementine import Clementine
 from Xlib.display import Display
+import pyautogui
 
 
 class Dispatcher(pm.PowerMateBase):
@@ -20,6 +21,7 @@ class Dispatcher(pm.PowerMateBase):
         super(Dispatcher, self).__init__(path)
         self._pulsing = False
         self._brightness = pm.MAX_BRIGHTNESS
+        self._scroll = False
         self._controllers = {'pulseaudio': Pulseaudio(), 'clementine': Clementine()}
         self._display = Display()  # Connects to the default display
 
@@ -53,13 +55,13 @@ class Dispatcher(pm.PowerMateBase):
             if hasattr(self._controllers[win_cls], 'long_press'):
                 self._controllers[win_cls].long_press()
             else:
-                return pm.LedEvent.pulse()
+                return pm.LedEvent(speed=pm.MAX_PULSE_SPEED / 2).pulse()
         else:
-            # Set the brightness value
-            self._brightness = pm.MAX_BRIGHTNESS - self._brightness
+            # Toggle the scroll state
+            self._scroll = not self._scroll
             # Toggle the led's state
-            if self._brightness == pm.MAX_BRIGHTNESS:
-                return pm.LedEvent.max()
+            if self._scroll:
+                return pm.LedEvent.pulse()
             else:
                 return pm.LedEvent.off()
 
@@ -70,17 +72,22 @@ class Dispatcher(pm.PowerMateBase):
         :return: None
         """
 
-        # Get the class of the active window
-        win_cls = self.get_active_win_class()
-        #print(win_cls)
-        # Dispatch the event to the corresponding controller if it exist
-        if win_cls is not None and win_cls in self._controllers:
-            if hasattr(self._controllers[win_cls], 'rotation'):
-                self._controllers[win_cls].rotate(rotation)
+        # Check the scroll status
+        if self._scroll:
+            # Simply scroll up or down
+            pyautogui.scroll(rotation * 2)
+        else:
+            # Get the class of the active window
+            win_cls = self.get_active_win_class()
+            #print(win_cls)
+            # Dispatch the event to the corresponding controller if it exist
+            if win_cls is not None and win_cls in self._controllers:
+                if hasattr(self._controllers[win_cls], 'rotation'):
+                    self._controllers[win_cls].rotate(rotation)
+                else:  # Defaults to the pulseaudio controller
+                    self._controllers['pulseaudio'].rotate(rotation=rotation, app_name=win_cls)
             else:  # Defaults to the pulseaudio controller
                 self._controllers['pulseaudio'].rotate(rotation=rotation, app_name=win_cls)
-        else:  # Defaults to the pulseaudio controller
-            self._controllers['pulseaudio'].rotate(rotation=rotation, app_name=win_cls)
 
     def push_rotate(self, rotation):
         """
