@@ -82,7 +82,13 @@ class Dispatcher(pm.PowerMateBase):
             self._controllers['pulseaudio'].rotate(rotation=rotation, app_name=win_cls)
 
     def push_rotate(self, rotation):
-        pass
+        """
+        For the moment the push rotate will default to previous/next song in the playlist
+        :param rotation: The direction of rotation
+        :return:
+        """
+
+        self._controllers['clementine'].push_rotate(rotation)
 
     def get_active_win_class(self):
         """

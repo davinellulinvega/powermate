@@ -49,6 +49,20 @@ class Clementine:
             # Issue a call to the control interface
             self._ctrl_iface.Stop()
 
+    def push_rotate(self, rotation):
+        """
+        Plays the next/previous song in the play list
+        :param rotation: The direction of rotation
+        :return:
+        """
+
+        # Initialize the player and its interfaces
+        if self._init_objs():
+            if rotation < 0:
+                self._ctrl_iface.Previous()
+            else:
+                self._ctrl_iface.Next()
+
     def _init_objs(self):
         """
         Initialize the player, properties interface and control interface
