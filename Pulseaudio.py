@@ -28,6 +28,10 @@ class Pulseaudio():
         if not isinstance(app_name, str) and app_name is not None:
             raise TypeError("Application name should be a String")
 
+        # Map some incoherence
+        if app_name == "gl":
+            app_name = "mpv"
+
         # Get the list of input sinks
         sinks = self._pulse.sink_input_list()
         for sink in sinks:
