@@ -72,6 +72,7 @@ class Dispatcher(pm.PowerMateBase):
 
         # Get the class of the active window
         win_cls = self.get_active_win_class()
+        #print(win_cls)
         # Dispatch the event to the corresponding controller if it exist
         if win_cls is not None and win_cls in self._controllers:
             if hasattr(self._controllers[win_cls], 'rotation'):
