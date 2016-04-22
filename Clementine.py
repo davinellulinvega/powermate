@@ -3,7 +3,6 @@
 __author__ = 'davinellulinvega'
 
 import dbus
-from sys import exit
 
 
 class Clementine:
