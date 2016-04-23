@@ -25,7 +25,7 @@ class Dispatcher(pm.PowerMateBase):
         self._pulsing = False
         self._brightness = pm.MAX_BRIGHTNESS
         self._scroll = False
-        self._controllers = {'pulseaudio': Pulseaudio(), 'clementine': Clementine()}
+        self._controllers = {'pulseaudio': Pulseaudio(), 'clementine': Clementine(), 'mpv': Mpv()}
         self._display = Display()  # Connects to the default display
 
     def short_press(self):
