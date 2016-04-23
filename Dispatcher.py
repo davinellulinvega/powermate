@@ -4,6 +4,7 @@
 import powermate as pm
 from Pulseaudio import Pulseaudio
 from Clementine import Clementine
+from Mpv import Mpv
 from Xlib.display import Display
 import pyautogui
 
