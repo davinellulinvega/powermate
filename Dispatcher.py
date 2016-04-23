@@ -7,6 +7,9 @@ from Clementine import Clementine
 from Xlib.display import Display
 import pyautogui
 
+# Declare a global variable for mapping window class to new names
+CLS_MAP = {'gl': 'mpv'}
+
 
 class Dispatcher(pm.PowerMateBase):
     """
@@ -112,11 +115,24 @@ class Dispatcher(pm.PowerMateBase):
             # Get the class of the parent window
             parent_cls = focus_win.query_tree().parent.get_wm_class()
             if parent_cls is not None:
-                return parent_cls[0]
+                return self._map_names(parent_cls[0])
             else:
                 return None
         else:
-            return win_cls[0]
+            return self._map_names(win_cls[0])
+
+    def _map_names(self, win_cls):
+        """
+        Map class names
+        :param win_cls: The window class
+        :return: String, representing the new mapped name or the win_class given in parameter
+        """
+
+        # If the class is in the mapping exchange its name
+        if win_cls in CLS_MAP:
+            return CLS_MAP[win_cls]
+        else:
+            return win_cls
 
 if __name__ == "__main__":
     try:
