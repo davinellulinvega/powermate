@@ -1,9 +1,15 @@
+description
+=====
+
+A simple dispatcher for the powermate device, based on the python script written by Bethebunny (https://github.com/bethebunny/powermate).
+
 setup
 =====
 
-Create a udev rule by creating the file ```/etc/rules.d/99-powermate.rules```
+Create a udev rule by creating the file `/etc/rules.d/99-powermate.rules`
 
-```ACTION=="add", ENV{ID_USB_DRIVER}=="powermate", SYMLINK+="input/powermate", MODE="0666"
+```
+ACTION=="add", ENV{ID_USB_DRIVER}=="powermate", SYMLINK+="input/powermate", MODE="0666"
 ```
 
 After creating the file either restart the udev service or unplug and plug the powermate back in.
