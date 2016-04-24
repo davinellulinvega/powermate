@@ -2,6 +2,7 @@ setup
 =====
 
 Create a udev rule by creating the file ```/etc/rules.d/99-powermate.rules```
+
 ```ACTION=="add", ENV{ID_USB_DRIVER}=="powermate", SYMLINK+="input/powermate", MODE="0666"
 ```
 
