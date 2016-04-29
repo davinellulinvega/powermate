@@ -72,10 +72,15 @@ class Pulseaudio():
         if app_name is not None:
             # Get the sink corresponding to the app
             sinks = self.get_sinks(app_name)
+            # Initialize a found variable
+            found = False
             if sinks is not None:
                 for sink in sinks:
                     if sink.mute == 0 and sink is not None:  # The sink was found and is not muted
                         self._pulse.volume_change_all_chans(sink, rotation * 0.005)
+                        found = True
+                if not found and app_name != "clementine":
+                    self.rotate(rotation, "clementine")
             else:  # We'll try to change the volume corresponding to clementine media player
                 if app_name != "clementine":
                     self.rotate(rotation, "clementine")
