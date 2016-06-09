@@ -54,6 +54,7 @@ class Dispatcher(pm.PowerMateBase):
 
         # Get the class of the active window
         win_cls = self.get_active_win_class()
+        print(win_cls)
         # Dispatch the event to the right controller
         if win_cls is not None and win_cls in self._controllers:
             if hasattr(self._controllers[win_cls], 'long_press'):
@@ -116,11 +117,11 @@ class Dispatcher(pm.PowerMateBase):
             # Get the class of the parent window
             parent_cls = focus_win.query_tree().parent.get_wm_class()
             if parent_cls is not None:
-                return self._map_names(parent_cls[0])
+                return self._map_names(parent_cls[-1])
             else:
                 return None
         else:
-            return self._map_names(win_cls[0])
+            return self._map_names(win_cls[-1])
 
     def _map_names(self, win_cls):
         """
