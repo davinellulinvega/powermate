@@ -14,6 +14,10 @@ class Pulseaudio():
         Initialize the connection to the pulseaudio server
         """
         self._pulse = Pulse(threading_lock=True)
+        self._note = pynotify.Notification("Volume", "0", "/usr/share/icons/Faenza/apps/48/"
+                                                                       "gnome-volume-control.png")
+        self._note.set_urgency(0)
+        pynotify.init("Vol notify")
 
     def get_sinks(self, app_name):
         """
@@ -80,14 +84,12 @@ class Pulseaudio():
                     if sink.mute == 0 and sink is not None:  # The sink was found and is not muted
                         self._pulse.volume_change_all_chans(sink, rotation * 0.005)
                         vol = round(self._pulse.volume_get_all_chans(sink) * 100, 1)
-                        if vol % 5 == 0 and pynotify.init("Vol notify"):
-                            # Declare a new notification
-                            n = pynotify.Notification("Volume", "{}".format(vol), "/usr/share/icons/Faenza/apps/48/"
-                                                                                  "gnome-volume-control.png")
-                            n.set_urgency(0)
+                        # Declare a new notification
+                        self._note.update("Volume", "{}".format(vol), "/usr/share/icons/Faenza/apps/48/"
+                                                                      "gnome-volume-control.png")
 
-                            # Show the notification
-                            n.show()
+                        # Show the notification
+                        self._note.show()
 
                         found = True
                 if not found and app_name != "clementine":
