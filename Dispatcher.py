@@ -116,24 +116,12 @@ class Dispatcher(pm.PowerMateBase):
             # Get the class of the parent window
             parent_cls = focus_win.query_tree().parent.get_wm_class()
             if parent_cls is not None:
-                return self._map_names(parent_cls[-1])
+                return parent_cls[-1].lower()
             else:
                 return None
         else:
-            return self._map_names(win_cls[-1])
+            return win_cls[-1].lower()
 
-    def _map_names(self, win_cls):
-        """
-        Map class names
-        :param win_cls: The window class
-        :return: String, representing the new mapped name or the win_class given in parameter
-        """
-
-        # If the class is in the mapping exchange its name
-        if win_cls in CLS_MAP:
-            return CLS_MAP[win_cls]
-        else:
-            return win_cls
 
 if __name__ == "__main__":
     try:
