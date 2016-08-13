@@ -100,6 +100,9 @@ class Pulseaudio():
             self._note.update("Volume", "{}".format(vol), "/usr/share/icons/Faenza/apps/48/"
                                                           "gnome-volume-control.png")
 
+            # Show the notification
+            self._note.show()
+
     def rotate(self, rotation, app_name=None):
         """
         Simply get the list of available sinks
