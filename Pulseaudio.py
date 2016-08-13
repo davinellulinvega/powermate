@@ -15,7 +15,7 @@ class Pulseaudio():
         """
         self._pulse = Pulse(threading_lock=True)
         self._note = pynotify.Notification("Volume", "0", "/usr/share/icons/Faenza/apps/48/"
-                                                                       "gnome-volume-control.png")
+                                                          "gnome-volume-control.png")
         self._note.set_urgency(0)
         pynotify.init("Vol notify")
 
@@ -48,6 +48,22 @@ class Pulseaudio():
         else:
             return None
 
+    def get_active_sink(self):
+        """
+        Get the first active pulseaudio sink
+        :return: PA_SINK object is any available, None otherwise.
+        """
+
+        # Get the list of input sinks
+        sinks = self._pulse.sink_input_list()
+        for sink in sinks:
+            # Check if the sink is muted or not
+            if sink.mute == 0:
+                return sink
+
+        # If no sink is found return none
+        return None
+
     def short_press(self, app_name=None):
         """
         Toggle the mute state of the sink corresponding to the given app
@@ -65,6 +81,24 @@ class Pulseaudio():
                     muted = bool(sink.mute)
                     # Toggle the state
                     self._pulse.mute(sink, mute=not muted)
+
+    def rotate_active_sink(self, rotation):
+        """
+        Increase/decrease the volume of the first active sink
+        :param rotation: the direction of the rotation
+        :return: Nothing
+        """
+
+        # Get the first active sink
+        sink = self.get_active_sink()
+
+        # Change the volume if possible
+        if sink is not None:
+            self._pulse.volume_change_all_chans(sink, rotation * 0.005)
+            vol = round(self._pulse.volume_get_all_chans(sink) * 100, 1)
+            # Declare a new notification
+            self._note.update("Volume", "{}".format(vol), "/usr/share/icons/Faenza/apps/48/"
+                                                          "gnome-volume-control.png")
 
     def rotate(self, rotation, app_name=None):
         """
@@ -92,8 +126,7 @@ class Pulseaudio():
                         self._note.show()
 
                         found = True
-                if not found and app_name != "clementine":
-                    self.rotate(rotation, "clementine")
+                if not found:
+                    self.rotate_active_sink(rotation)
             else:  # We'll try to change the volume corresponding to clementine media player
-                if app_name != "clementine":
-                    self.rotate(rotation, "clementine")
+                self.rotate_active_sink(rotation)
