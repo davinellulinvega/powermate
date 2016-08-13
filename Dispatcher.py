@@ -116,11 +116,11 @@ class Dispatcher(pm.PowerMateBase):
             # Get the class of the parent window
             parent_cls = focus_win.query_tree().parent.get_wm_class()
             if parent_cls is not None:
-                return parent_cls[-1].lower()
+                return str(parent_cls[-1].lower())
             else:
                 return None
         else:
-            return win_cls[-1].lower()
+            return str(win_cls[-1].lower())
 
 
 if __name__ == "__main__":
