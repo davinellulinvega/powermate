@@ -59,7 +59,7 @@ class Dispatcher(pm.PowerMateBase):
             if hasattr(self._controllers[win_cls], 'long_press'):
                 self._controllers[win_cls].long_press()
             else:
-                return pm.LedEvent(speed=pm.MAX_PULSE_SPEED / 2).pulse()
+                return pm.LedEvent().off()
         else:
             # Toggle the scroll state
             self._scroll = not self._scroll
@@ -67,7 +67,7 @@ class Dispatcher(pm.PowerMateBase):
             if self._scroll:
                 return pm.LedEvent.pulse()
             else:
-                return pm.LedEvent.off()
+                return pm.LedEvent.percent(0.5)
 
     def rotate(self, rotation):
         """
