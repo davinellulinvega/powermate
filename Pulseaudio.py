@@ -133,3 +133,5 @@ class Pulseaudio():
                     self.rotate_active_sink(rotation)
             else:  # We'll try to change the volume corresponding to clementine media player
                 self.rotate_active_sink(rotation)
+        else:
+            self.rotate_active_sink(rotation)
