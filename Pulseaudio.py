@@ -1,7 +1,7 @@
 #!/usr/bin/env python2.7
 
 from pulsectl import Pulse
-import pynotify
+import notify2 as pynotify
 
 
 class Pulseaudio():
