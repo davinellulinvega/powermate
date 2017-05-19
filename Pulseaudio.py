@@ -37,9 +37,9 @@ class Pulseaudio():
         sinks = self._pulse.sink_input_list()
         for sink in sinks:
             # Get the name of the binary associated with the sink
-            sink_app_name = sink.proplist["application.process.binary"]
+            sink_app_name = sink.proplist.get("application.process.binary", None)
             # Check that the sink is not muted and correspond to the app_name given in parameter
-            if sink_app_name == app_name.lower():
+            if sink_app_name is not None and sink_app_name == app_name.lower():
                 app_sink.append(sink)
 
         # Return the sink object
@@ -57,8 +57,8 @@ class Pulseaudio():
         # Get the list of input sinks
         sinks = self._pulse.sink_input_list()
         for sink in sinks:
-            # Check if the sink is muted or not
-            if sink.mute == 0:
+            # Check if the sink is muted and attached to an application
+            if sink.mute == 0 and sink.proplist.get("application.process.binary", None) is not None:
                 return sink
 
         # If no sink is found return none
