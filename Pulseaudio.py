@@ -19,14 +19,6 @@ class Pulseaudio():
         self._note.set_urgency(0)
         pynotify.init("Vol notify")
 
-        # Get the main sink
-        for sink in self._pulse.sink_list():
-            if sink.card == 1:
-                self._main_sink = sink
-                break
-        else:
-            self._main_sink = None
-
     def get_sinks(self, app_name):
         """
         Get the sink corresponding to the given application
@@ -146,9 +138,11 @@ class Pulseaudio():
         :return: Nothing.
         """
 
-        # Query the volume of the main sink
-        if self._main_sink is not None:
-            main_vol = self._main_sink.volume.value_flat
+        # Get the main sink
+        for sink in self._pulse.sink_list():
+            if sink.card == 1:
+                main_vol = sink.volume.value_flat
+                break
         else:
             main_vol = 1
 
