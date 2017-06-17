@@ -19,6 +19,14 @@ class Pulseaudio():
         self._note.set_urgency(0)
         pynotify.init("Vol notify")
 
+        # Get the main sink
+        for sink in self._pulse.sink_list():
+            if sink.card == 1:
+                self._main_sink = sink
+                break
+        else:
+            self._main_sink = None
+
     def get_sinks(self, app_name):
         """
         Get the sink corresponding to the given application
@@ -92,16 +100,14 @@ class Pulseaudio():
         # Get the first active sink
         sink = self.get_active_sink()
 
-        # Change the volume if possible
+        # Make sure there is a sink to change
         if sink is not None:
+            # Change the volume if possible
             self._pulse.volume_change_all_chans(sink, rotation * 0.005)
             vol = round(self._pulse.volume_get_all_chans(sink) * 100, 1)
-            # Declare a new notification
-            self._note.update("Volume", "{}".format(vol), "/usr/share/icons/Faenza/apps/48/"
-                                                          "gnome-volume-control.png")
 
-            # Show the notification
-            self._note.show()
+            # Display a notification
+            self._display_notification(vol)
 
     def rotate(self, rotation, app_name=None):
         """
@@ -121,12 +127,9 @@ class Pulseaudio():
                     if sink.mute == 0 and sink is not None:  # The sink was found and is not muted
                         self._pulse.volume_change_all_chans(sink, rotation * 0.005)
                         vol = round(self._pulse.volume_get_all_chans(sink) * 100, 1)
-                        # Declare a new notification
-                        self._note.update("Volume", "{}".format(vol), "/usr/share/icons/Faenza/apps/48/"
-                                                                      "gnome-volume-control.png")
 
                         # Show the notification
-                        self._note.show()
+                        self._display_notification(vol)
 
                         found = True
                 if not found:
@@ -135,3 +138,23 @@ class Pulseaudio():
                 self.rotate_active_sink(rotation)
         else:
             self.rotate_active_sink(rotation)
+
+    def _display_notification(self, volume):
+        """
+        Display a notification showing the overall current volume.
+        :param volume: A float representing the value of the current sink input.
+        :return: Nothing.
+        """
+
+        # Query the volume of the main sink
+        if self._main_sink is not None:
+            main_vol = self._main_sink.volume.value_flat
+        else:
+            main_vol = 1
+
+        # Declare a new notification
+        self._note.update("Volume", "{}".format(round(volume * main_vol, 2)), "/usr/share/icons/Faenza/apps/48/"
+                                                                              "gnome-volume-control.png")
+
+        # Show the notification
+        self._note.show()
