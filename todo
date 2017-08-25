@@ -1,1 +1,0 @@
-- In pulse audio controller, first long press display dmenu to select output to modify. Second long press clear choice. By default modify output corresponding to active window, or first one in the list if none found. Further, if choice made during long press, then only modify this output and ignore current window.
