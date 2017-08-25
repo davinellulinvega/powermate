@@ -46,7 +46,7 @@ class Dispatcher(pm.PowerMateBase):
                 self._toggle_mute_sinks(self._get_app_sinks(win_cls))
 
                 # Declare a new notification
-                self._note.update("Toggle Mute status App.", "{}".format(win_cls), "/usr/share/icons/Faenza/apps/48/gnome-volume-control.png")
+                self._note.update("Toggle Mute status", "{}".format(win_cls.capitalize()), "/usr/share/icons/Faenza/apps/48/gnome-volume-control.png")
 
                 # Show the notification
                 self._note.show()
