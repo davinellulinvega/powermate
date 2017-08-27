@@ -90,16 +90,22 @@ class Dispatcher(pm.PowerMateBase):
         :return: None
         """
 
-        # Check if the long press flag is on
-        if self._long_pressed:
-            # Change the volume of the current sinks
-            self._change_volume_sinks(self._current_sinks, rotation)
-        else:
-            # Get the class of the active window
-            win_cls = self._get_active_win_class()
-            if win_cls is not None:
-                # Change the volume of the sinks
-                self._change_volume_sinks(self._get_app_sinks(win_cls), rotation)
+        # Get the class of the active window
+        win_cls = self._get_active_win_class()
+        if win_cls is not None:
+            # Change the volume of the sinks
+            self._change_volume_sinks(self._get_app_sinks(win_cls), rotation)
+
+    def push_rotate(self, rotation):
+        """
+        Changes the volume of the sinks registered by the long_press event, according to the given rotation.
+        :param rotation: The direction and amplitude of the rotation. (negative = left, positive = right).
+        :return: Nothing.
+        """
+
+        # Change the volume of the current sinks
+        self._change_volume_sinks(self._current_sinks, rotation)
+
 
     def _toggle_mute_sinks(self, sinks):
         """
