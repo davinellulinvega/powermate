@@ -33,23 +33,21 @@ class Dispatcher(pm.PowerMateBase):
         :return: None
         """
 
-        # Check if the long press flag is on
-        if self._long_pressed:
+        # Get the class of the active window
+        win_cls = self._get_active_win_class()
+        if win_cls is not None:
+            # Toggle the mute status of the active window
+            self._toggle_mute_sinks(self._get_app_sinks(win_cls))
+
+            # Declare a new notification
+            self._note.update("Toggle Mute status", "{}".format(win_cls.capitalize()), "/usr/share/icons/Faenza/apps/48/gnome-volume-control.png")
+
+            # Show the notification
+            self._note.show()
+        
+        elif self._long_pressed: # Check if the long press flag is on
             # Toggle the mute state of the current sink
             self._toggle_mute_sinks(self._current_sinks)
-
-        else:
-            # Get the class of the active window
-            win_cls = self._get_active_win_class()
-            if win_cls is not None:
-                # Toggle the mute status of the active window
-                self._toggle_mute_sinks(self._get_app_sinks(win_cls))
-
-                # Declare a new notification
-                self._note.update("Toggle Mute status", "{}".format(win_cls.capitalize()), "/usr/share/icons/Faenza/apps/48/gnome-volume-control.png")
-
-                # Show the notification
-                self._note.show()
 
     def long_press(self):
         """
