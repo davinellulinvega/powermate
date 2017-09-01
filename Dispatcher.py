@@ -37,9 +37,14 @@ class Dispatcher(pm.PowerMateBase):
         sinks = self._get_sinks()
         # Get the names of the apps linked to the sinks
         app_sinks = {sink.proplist.get("application.process.binary") for sink in sinks}
-        # Display a menu to select the application to control
-        app_name = dmenu.show(list(app_sinks), bottom=True, fast=True, prompt="App. name?", lines=10,
-                              font="Monospace-6:Normal", background_selected="#841313")
+        if len(app_sinks) > 1:
+            # Display a menu to select the application to control
+            app_name = dmenu.show(list(app_sinks), bottom=True, fast=True, prompt="App. name?", lines=10,
+                                  font="Monospace-6:Normal", background_selected="#841313")
+        elif len(app_sinks) == 1:
+            app_name = list(app_sinks)[0]
+        else:
+            app_name = None
 
         # If successful
         if app_name is not None:
@@ -69,9 +74,16 @@ class Dispatcher(pm.PowerMateBase):
             sinks = self._get_sinks()
             # Get the names of the apps linked to the sinks
             app_sinks = {sink.proplist.get("application.process.binary") for sink in sinks}
-            # Display a menu to select the application to control
-            app_name = dmenu.show(list(app_sinks), bottom=True, fast=True, prompt="App. name?", lines=10,
-                                  font="Monospace-6:Normal", background_selected="#841313")
+            # Remove the active window
+            app_sinks.discard(self._get_active_win_class())
+            if len(app_sinks) > 1:
+                # Display a menu to select the application to control
+                app_name = dmenu.show(list(app_sinks), bottom=True, fast=True, prompt="App. name?", lines=10,
+                                      font="Monospace-6:Normal", background_selected="#841313")
+            elif len(app_sinks) == 1:
+                app_name = list(app_sinks)[0]
+            else:
+                app_name = None
 
             # If successful
             if app_name is not None:
