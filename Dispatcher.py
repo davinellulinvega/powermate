@@ -33,23 +33,24 @@ class Dispatcher(pm.PowerMateBase):
         :return: None
         """
 
-        # Check if the long press flag is on
-        if self._long_pressed:
-            # Toggle the mute state of the current sink
-            self._toggle_mute_sinks(self._current_sinks)
+        # Get the list of active sinks
+        sinks = self._get_sinks()
+        # Get the names of the apps linked to the sinks
+        app_sinks = {sink.proplist.get("application.process.binary") for sink in sinks}
+        # Display a menu to select the application to control
+        app_name = dmenu.show(list(app_sinks), bottom=True, fast=True, prompt="App. name?", lines=10,
+                              font="Monospace-6:Normal", background_selected="#841313")
 
-        else:
-            # Get the class of the active window
-            win_cls = self._get_active_win_class()
-            if win_cls is not None:
-                # Toggle the mute status of the active window
-                self._toggle_mute_sinks(self._get_app_sinks(win_cls))
+        # If successful
+        if app_name is not None:
+            # Toggle the mute status of the selected sink
+            self._toggle_mute_sinks(self._get_app_sinks(app_name))
 
-                # Declare a new notification
-                self._note.update("Toggle Mute status", "{}".format(win_cls.capitalize()), "/usr/share/icons/Faenza/apps/48/gnome-volume-control.png")
+            # Declare a new notification
+            self._note.update("Toggle Mute status", "{}".format(app_name.capitalize()), "/usr/share/icons/Faenza/apps/48/gnome-volume-control.png")
 
-                # Show the notification
-                self._note.show()
+            # Show the notification
+            self._note.show()
 
     def long_press(self):
         """
@@ -82,6 +83,11 @@ class Dispatcher(pm.PowerMateBase):
 
                 # Have the powermate pulse
                 return pm.LedEvent.pulse()
+            else:
+                # Make sure the long press flag is off
+                self._long_pressed = False
+                # Stop the pulse
+                return pm.LedEvent.max()
 
     def rotate(self, rotation):
         """
