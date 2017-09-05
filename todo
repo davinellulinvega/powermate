@@ -1,0 +1,2 @@
+- On long press store application name, rather than sinks, since sinks associated with an application can change overtime.
+- Get the list of sinks associated with the stored application for all operations.
