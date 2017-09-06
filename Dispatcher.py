@@ -20,7 +20,7 @@ class Dispatcher(pm.PowerMateBase):
         super(Dispatcher, self).__init__(path, long_threshold=500)
         self._long_pressed = False
         self._pulse = Pulse(threading_lock=True)
-        self._current_sinks = []
+        self._stored_app = None
         self._display = Display()  # Connects to the default display
         self._note = pynotify.Notification("Volume", "0", "/usr/share/icons/Faenza/apps/48/"
                                                           "gnome-volume-control.png")
@@ -66,7 +66,7 @@ class Dispatcher(pm.PowerMateBase):
         if self._long_pressed:
             # Re-initialize the state of the powermate
             self._long_pressed = False
-            self._current_sinks = []
+            self._stored_app = None
             # Just light up the powermate
             return pm.LedEvent.max()
         else:
@@ -88,7 +88,7 @@ class Dispatcher(pm.PowerMateBase):
             # If successful
             if app_name is not None:
                 # Store the list of sinks corresponding to the app name
-                self._current_sinks = self._get_app_sinks(app_name)
+                self._stored_app = app_name
 
                 # Toggle the long press state
                 self._long_pressed = True
@@ -122,7 +122,7 @@ class Dispatcher(pm.PowerMateBase):
         """
 
         # Change the volume of the current sinks
-        self._change_volume_sinks(self._current_sinks, rotation)
+        self._change_volume_sinks(self._get_app_sinks(self._stored_app), rotation)
 
 
     def _toggle_mute_sinks(self, sinks):
@@ -182,13 +182,13 @@ class Dispatcher(pm.PowerMateBase):
         """
 
         # Make sure the app_name is a string
-        if not isinstance(app_name, str) and app_name is not None:
-            raise TypeError("Application name should be a String")
-
-        # Get the list of input sinks
-        sinks = self._get_sinks()
-        # Return the list of sinks corresponding to the application
-        return [sink for sink in sinks if sink.proplist.get("application.process.binary").lower() == app_name]
+        if isinstance(app_name, str) and app_name is not None:
+            # Get the list of input sinks
+            sinks = self._get_sinks()
+            # Return the list of sinks corresponding to the application
+            return [sink for sink in sinks if sink.proplist.get("application.process.binary").lower() == app_name]
+        else:
+            return []
 
     def _get_sinks(self):
         """
