@@ -1,23 +1,25 @@
 #!/usr/bin/python3
 # -*- coding: utf-8 -*-
-import powermate as pm
+from time import sleep
+from Powermate import Powermate
 from Xlib.display import Display
 import notify2 as pynotify
 from pulsectl import Pulse
 import dmenu
 
+POLE_TIME = 10
 
-class Dispatcher(pm.PowerMateBase):
+
+class Dispatcher:
     """
     A simple dispatcher class that receive powermate events and dispatch them to the right controller
     """
 
-    def __init__(self, path='/dev/input/powermate'):
+    def __init__(self, observer):
         """
         Initialize the super class and define the local members
         :param path: The path to the powermate device
         """
-        super(Dispatcher, self).__init__(path, long_threshold=500)
         self._long_pressed = False
         self._pulse = Pulse(threading_lock=True)
         self._stored_app = None
@@ -26,6 +28,12 @@ class Dispatcher(pm.PowerMateBase):
                                                           "gnome-volume-control.png")
         self._note.set_urgency(0)
         pynotify.init("Vol notify")
+
+        self._powermate = observer
+        self._powermate.register('short_press', self.short_press)
+        self._powermate.register('long_press', self.long_press)
+        self._powermate.register('press_rotate', self.push_rotate)
+        self._powermate.register('rotate', self.rotate)
 
     def short_press(self):
         """
@@ -68,7 +76,7 @@ class Dispatcher(pm.PowerMateBase):
             self._long_pressed = False
             self._stored_app = None
             # Just light up the powermate
-            return pm.LedEvent.max()
+            self._powermate.led_max()
         else:
             # Get the list of active sinks
             sinks = self._get_sinks()
@@ -94,12 +102,12 @@ class Dispatcher(pm.PowerMateBase):
                 self._long_pressed = True
 
                 # Have the powermate pulse
-                return pm.LedEvent.pulse()
+                self._powermate.led_pulse()
             else:
                 # Make sure the long press flag is off
                 self._long_pressed = False
                 # Stop the pulse
-                return pm.LedEvent.max()
+                self._powermate.led_max()
 
     def rotate(self, rotation):
         """
@@ -123,7 +131,6 @@ class Dispatcher(pm.PowerMateBase):
 
         # Change the volume of the current sinks
         self._change_volume_sinks(self._get_app_sinks(self._stored_app), rotation)
-
 
     def _toggle_mute_sinks(self, sinks):
         """
@@ -233,16 +240,33 @@ class Dispatcher(pm.PowerMateBase):
 
         # Close the connection to the pulse server
         self._pulse.close()
-        # Try to switch the powermate off
-        return pm.LedEvent.off()
+        self._powermate.led_off()
 
 if __name__ == "__main__":
-    # Create the dispatcher object
-    disp = Dispatcher()
-    try:
-        # Launch it into a new thread
-        disp.run()
-    except BaseException:
-        pass
-    finally:
-        disp._handle_exception()
+    while True:
+        # Create a powermate observer
+        try:
+            pm = Powermate()
+        except OSError:
+            sleep(POLE_TIME)
+            continue
+        except RuntimeError:
+            sleep(POLE_TIME)
+            continue
+
+        # Create the dispatcher object
+        disp = Dispatcher(pm)
+
+        # Listen for powermate events
+        try:
+            pm.listen()
+        except KeyboardInterrupt:
+            disp._handle_exception()
+            pm.shutdown()
+            break
+        except OSError:
+            disp._handle_exception()
+            sleep(POLE_TIME)
+        except RuntimeError:
+            disp._handle_exception()
+            sleep(POLE_TIME)
