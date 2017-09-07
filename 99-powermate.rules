@@ -1,0 +1,1 @@
+KERNELS=="input*" SUBSYSTEMS=="input" ATTRS{name}=="Griffin PowerMate" MODE="0666"
