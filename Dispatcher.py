@@ -2,6 +2,7 @@
 # -*- coding: utf-8 -*-
 from time import sleep
 from Powermate import Powermate
+from PowermateLed import PowermateLed
 from Xlib.display import Display
 import notify2 as pynotify
 from pulsectl import Pulse
@@ -29,11 +30,8 @@ class Dispatcher:
         self._note.set_urgency(0)
         pynotify.init("Vol notify")
 
-        self._powermate = observer
-        self._powermate.register('short_press', self.short_press)
-        self._powermate.register('long_press', self.long_press)
-        self._powermate.register('press_rotate', self.push_rotate)
-        self._powermate.register('rotate', self.rotate)
+        self._led = PowermateLed()
+        self._led.max()
 
     def short_press(self):
         """
@@ -76,7 +74,7 @@ class Dispatcher:
             self._long_pressed = False
             self._stored_app = None
             # Just light up the powermate
-            self._powermate.led_max()
+            self._led.max()
         else:
             # Get the list of active sinks
             sinks = self._get_sinks()
@@ -102,12 +100,12 @@ class Dispatcher:
                 self._long_pressed = True
 
                 # Have the powermate pulse
-                self._powermate.led_pulse()
+                self._led.pulse()
             else:
                 # Make sure the long press flag is off
                 self._long_pressed = False
                 # Stop the pulse
-                self._powermate.led_max()
+                self._led.max()
 
     def rotate(self, rotation):
         """
@@ -240,7 +238,7 @@ class Dispatcher:
 
         # Close the connection to the pulse server
         self._pulse.close()
-        self._powermate.led_off()
+        self._led.off()
 
 if __name__ == "__main__":
     while True:
@@ -256,6 +254,10 @@ if __name__ == "__main__":
 
         # Create the dispatcher object
         disp = Dispatcher(pm)
+        pm.register('short_press', disp.short_press)
+        pm.register('long_press', disp.long_press)
+        pm.register('press_rotate', disp.push_rotate)
+        pm.register('rotate', disp.rotate)
 
         # Listen for powermate events
         try:
