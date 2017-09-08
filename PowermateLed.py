@@ -35,7 +35,6 @@ class PowermateLed:
     def off(self):
         self._device.write(evdev.ecodes.EV_MSC, evdev.ecodes.MSC_PULSELED, 0)
 
-
     def shutdown(self):
         self.off()
         self._device.close()
