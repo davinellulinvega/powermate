@@ -31,7 +31,7 @@ class Powermate(Observable):
 
         try:
             for event in self._device.read_loop():
-                if event.code not in evdev.ecodes.SYN:  # Ignore synchronization events
+                if event.type not in [evdev.ecodes.EV_SYN, evdev.ecodes.EV_MSC]:  # Ignore synchronization and led events
                     # Rotate
                     if event.code == evdev.ecodes.REL_DIAL and event.type == evdev.ecodes.EV_REL:
                         if pressed:
@@ -47,17 +47,18 @@ class Powermate(Observable):
                         if event.value == 1:  # Pressed
                             press_start = event.timestamp()
                             pressed = True
-                        elif not rotated:  # Released
+                        else:  # Released
+                            if not rotated:
+                                if (event.timestamp() - press_start) < self._longpress_delay:
+                                    event_name = 'short_press'
+                                else:
+                                    event_name = 'long_press'
+                                for fn in self._observers[event_name]:
+                                    fn()
+
                             pressed = False
-                            print((event.timestamp() - press_start))
-                            if (event.timestamp() - press_start) < self._longpress_delay:
-                                event_name = 'short_press'
-                            else:
-                                event_name = 'long_press'
-                            for fn in self._observers[event_name]:
-                                fn()
-                        else:
                             rotated = False
+
         except OSError as e:
             self.unregister_all()
 
