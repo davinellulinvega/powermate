@@ -1,5 +1,6 @@
 #!/usr/bin/env python3
 import evdev
+from time import time
 from Observable import Observable
 
 LONGPRESS_DELAY = 0.3  # Seconds
@@ -31,6 +32,10 @@ class Powermate(Observable):
 
         try:
             for event in self._device.read_loop():
+                # Skip late inputs -- more than 2 seconds late
+                if abs(time() - event.timestamp()) > 2:
+                    continue
+
                 if event.type not in [evdev.ecodes.EV_SYN, evdev.ecodes.EV_MSC]:  # Ignore synchronization and led events
                     # Rotate
                     if event.code == evdev.ecodes.REL_DIAL and event.type == evdev.ecodes.EV_REL:
