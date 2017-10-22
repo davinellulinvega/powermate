@@ -217,7 +217,7 @@ class Dispatcher:
 
         # Get the main sink
         for sink in self._pulse.sink_list():
-            if sink.card == 1:
+            if sink.state == "running":
                 main_vol = sink.volume.value_flat
                 break
         else:
