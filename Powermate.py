@@ -3,7 +3,7 @@ import evdev
 from time import time
 from Observable import Observable
 
-LONGPRESS_DELAY = 0.3  # Seconds
+LONGPRESS_DELAY = 0.5  # Seconds
 ID_VENDOR = 0x077d
 ID_PRODUCT = 0x0410
 
