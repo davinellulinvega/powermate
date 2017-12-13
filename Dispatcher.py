@@ -154,7 +154,7 @@ class Dispatcher:
         vol = 0
         for sink in sinks:
             self._pulse.volume_change_all_chans(sink, rotation * 0.005)
-            vol = round(self._pulse.volume_get_all_chans(sink) * 100, 1)
+            vol = round(self._pulse.volume_get_all_chans(sink) * 100, 2)
 
         # Show the notification
         self._display_notification(vol)
@@ -218,7 +218,7 @@ class Dispatcher:
         # Get the main sink
         for sink in self._pulse.sink_list():
             if sink.state == "running":
-                main_vol = sink.volume.value_flat
+                main_vol = round(sink.volume.value_flat, 2)
                 break
         else:
             main_vol = 1
