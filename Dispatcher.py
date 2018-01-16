@@ -50,9 +50,6 @@ class Dispatcher:
         app_sinks = {"{} {}".format(sink.proplist.get("application.name"), sink.index): sink for sink in sinks}
         if len(app_sinks) > 1:
             # Display a menu to select the application to control
-            menu = Rofi()
-            menu.hide_scrollbar = True
-            menu.prompt = "App. name?"
             try:
                 res = self._rofi(app_sinks)
             except MenuError:
