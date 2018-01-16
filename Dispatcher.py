@@ -6,7 +6,8 @@ from PowermateLed import PowermateLed
 from Xlib.display import Display
 import notify2 as pynotify
 from pulsectl import Pulse
-import dmenu
+from dynmen.rofi import Rofi
+from dynmen.menu import MenuError
 
 POLE_TIME = 10
 
@@ -33,6 +34,10 @@ class Dispatcher:
         self._led = PowermateLed()
         self._led.max()
 
+        self._rofi = Rofi()
+        self._rofi.hide_scrollbar = True
+        self._rofi.prompt = "App. name?"
+
     def short_press(self):
         """
         Manage the short_press event
@@ -42,23 +47,29 @@ class Dispatcher:
         # Get the list of active sinks
         sinks = self._get_sinks()
         # Get the names of the apps linked to the sinks
-        app_sinks = {sink.proplist.get("application.process.binary") for sink in sinks}
+        app_sinks = {"{} {}".format(sink.proplist.get("application.name"), sink.index): sink for sink in sinks}
         if len(app_sinks) > 1:
             # Display a menu to select the application to control
-            app_name = dmenu.show(list(app_sinks), bottom=True, fast=True, prompt="App. name?", lines=10,
-                                  font="Monospace-6:Normal", background_selected="#841313")
+            menu = Rofi()
+            menu.hide_scrollbar = True
+            menu.prompt = "App. name?"
+            try:
+                res = self._rofi(app_sinks)
+            except MenuError:
+                return
+            app_sink = res.value
         elif len(app_sinks) == 1:
-            app_name = list(app_sinks)[0]
+            _, app_sink = app_sinks.popitem()
         else:
-            app_name = None
+            app_sink = None
 
         # If successful
-        if app_name is not None:
+        if app_sink is not None:
             # Toggle the mute status of the selected sink
-            self._toggle_mute_sinks(self._get_app_sinks(app_name))
+            self._toggle_mute_sinks([app_sink])
 
             # Declare a new notification
-            self._note.update("Toggle Mute status", "{}".format(app_name.capitalize()), "/usr/share/icons/Faenza/apps/48/gnome-volume-control.png")
+            self._note.update("Toggle Mute status", "{}".format(app_sink.proplist.get("application.name")), "/usr/share/icons/Faenza/apps/48/gnome-volume-control.png")
 
             # Show the notification
             self._note.show()
@@ -79,15 +90,16 @@ class Dispatcher:
             # Get the list of active sinks
             sinks = self._get_sinks()
             # Get the names of the apps linked to the sinks
-            app_sinks = {sink.proplist.get("application.process.binary") for sink in sinks}
-            # Remove the active window
-            app_sinks.discard(self._get_active_win_class())
+            app_sinks = {sink.proplist.get("application.name"):sink.proplist.get("application.process.binary") for sink in sinks if sink.proplist.get("application.process.binary") not in self._get_active_win_class()}
             if len(app_sinks) > 1:
                 # Display a menu to select the application to control
-                app_name = dmenu.show(list(app_sinks), bottom=True, fast=True, prompt="App. name?", lines=10,
-                                      font="Monospace-6:Normal", background_selected="#841313")
+                try:
+                    res = self._rofi(app_sinks)
+                except MenuError:
+                    return
+                app_name = res.value
             elif len(app_sinks) == 1:
-                app_name = list(app_sinks)[0]
+                _, app_name = app_sinks.popitem()
             else:
                 app_name = None
 
