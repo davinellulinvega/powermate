@@ -163,13 +163,12 @@ class Dispatcher:
         """
 
         # Change the volume of the sinks
-        vol = 0
         for sink in sinks:
             self._pulse.volume_change_all_chans(sink, rotation * 0.005)
-            vol = round(self._pulse.volume_get_all_chans(sink) * 100, 2)
 
-        # Show the notification
-        self._display_notification(vol)
+            # Show the notification
+            self._display_notification(sink)
+
 
     def _get_active_win_class(self):
         """
@@ -220,17 +219,20 @@ class Dispatcher:
         # Return the list of active sinks
         return sinks
 
-    def _display_notification(self, volume):
+    def _display_notification(self, sink_in):
         """
         Display a notification showing the overall current volume.
         :param volume: A float representing the value of the current sink input.
         :return: Nothing.
         """
 
+        # Get the volume of the input sink
+        volume = self._pulse.volume_get_all_chans(sink_in) * 100
+
         # Get the main sink
         for sink in self._pulse.sink_list():
-            if sink.state == "running":
-                main_vol = round(sink.volume.value_flat, 2)
+            if sink.index == sink_in.sink:
+                main_vol = sink.volume.value_flat
                 break
         else:
             main_vol = 1
