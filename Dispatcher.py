@@ -224,7 +224,7 @@ class Dispatcher:
         """
 
         # Get the volume of the input sink
-        volume = self._pulse.volume_get_all_chans(sink_in) * 100
+        volume = self._pulse.volume_get_all_chans(sink_in)
 
         # Get the main sink
         for sink in self._pulse.sink_list():
@@ -235,8 +235,8 @@ class Dispatcher:
             main_vol = 1
 
         # Declare a new notification
-        self._note.update("Volume", "{}".format(round(volume * main_vol, 2)), "/usr/share/icons/Faenza/apps/48/"
-                                                                              "gnome-volume-control.png")
+        self._note.update("Volume", "{:.2%}".format(volume * main_vol), "/usr/share/icons/Faenza/apps/48/"
+                                                                        "gnome-volume-control.png")
 
         # Show the notification
         self._note.show()
