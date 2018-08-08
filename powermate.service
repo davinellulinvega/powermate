@@ -3,7 +3,7 @@ Description=Event dispatcher script for the Griffin Powermate nob
 
 [Service]
 Type=simple
-ExecStart=/usr/bin/python3 /home/davinellulinvega/Softwares/PulseaudioScripts/Powermate/Dispatcher.py
+ExecStart=/usr/bin/python3 ${HOME}/Softwares/PulseaudioScripts/Powermate/Dispatcher.py
 Restart=on-failure
 
 [Install]
