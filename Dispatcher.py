@@ -10,6 +10,7 @@ from dynmen.rofi import Rofi
 from dynmen.menu import MenuError
 
 POLE_TIME = 10
+pynotify.init("Vol notify")
 
 
 class Dispatcher:
@@ -29,7 +30,6 @@ class Dispatcher:
         self._note = pynotify.Notification("Volume", "0", "/usr/share/icons/Faenza/apps/48/"
                                                           "gnome-volume-control.png")
         self._note.set_urgency(0)
-        pynotify.init("Vol notify")
 
         self._led = PowermateLed()
         self._led.max()
