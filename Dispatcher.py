@@ -24,7 +24,6 @@ class Dispatcher:
         :param path: The path to the powermate device
         """
         self._long_pressed = False
-        self._pulse = Pulse(threading_lock=True)
         self._stored_app = None
         self._display = Display()  # Connects to the default display
         self._note = pynotify.Notification("Volume", "0", "/usr/share/icons/Faenza/apps/48/"
@@ -37,6 +36,15 @@ class Dispatcher:
         self._rofi = Rofi()
         self._rofi.hide_scrollbar = True
         self._rofi.prompt = "App. name?"
+
+    def turn_led_off(self):
+        """
+        Simply turns the LED off to indicate an error or that the powermate is not being used.
+        :return: Nothing
+        """
+
+        # Does what it says on the tin
+        self._led.off()
 
     def short_press(self):
         """
@@ -147,9 +155,10 @@ class Dispatcher:
         """
 
         # Toggle the mute status
-        for sink in sinks:
-            muted = bool(sink.mute)
-            self._pulse.mute(sink, mute=not muted)
+        with Pulse(threading_lock=True) as pulse:
+            for sink in sinks:
+                muted = bool(sink.mute)
+                pulse.mute(sink, mute=not muted)
 
     def _change_volume_sinks(self, sinks, rotation):
         """
@@ -160,11 +169,12 @@ class Dispatcher:
         """
 
         # Change the volume of the sinks
-        for sink in sinks:
-            self._pulse.volume_change_all_chans(sink, rotation * 0.005)
+        with Pulse(threading_lock=True) as pulse:
+            for sink in sinks:
+                pulse.volume_change_all_chans(sink, rotation * 0.005)
 
-            # Show the notification
-            self._display_notification(sink)
+                # Show the notification
+                self._display_notification(sink)
 
 
     def _get_active_win_class(self):
@@ -210,8 +220,9 @@ class Dispatcher:
         """
 
         # Get the list of input sinks
-        sinks = [sink for sink in self._pulse.sink_input_list()
-                 if sink.proplist.get("application.process.binary", None) is not None]
+        with Pulse(threading_lock=True) as pulse:
+            sinks = [sink for sink in pulse.sink_input_list()
+                     if sink.proplist.get("application.process.binary", None) is not None]
 
         # Return the list of active sinks
         return sinks
@@ -224,15 +235,17 @@ class Dispatcher:
         """
 
         # Get the volume of the input sink
-        volume = self._pulse.volume_get_all_chans(sink_in)
+        with Pulse(threading_lock=True) as pulse:
+            volume = pulse.volume_get_all_chans(sink_in)
 
         # Get the main sink
-        for sink in self._pulse.sink_list():
-            if sink.index == sink_in.sink:
-                main_vol = sink.volume.value_flat
-                break
-        else:
-            main_vol = 1
+        with Pulse(threading_lock=True) as pulse:
+            for sink in pulse.sink_list():
+                if sink.index == sink_in.sink:
+                    main_vol = sink.volume.value_flat
+                    break
+            else:
+                main_vol = 1
 
         # Declare a new notification
         self._note.update("Volume", "{:.2%}".format(volume * main_vol), "/usr/share/icons/Faenza/apps/48/"
@@ -240,16 +253,6 @@ class Dispatcher:
 
         # Show the notification
         self._note.show()
-
-    def _handle_exception(self):
-        """
-        Close the connection to the pulse server.
-        :return: Nothing
-        """
-
-        # Close the connection to the pulse server
-        self._pulse.close()
-        self._led.off()
 
 if __name__ == "__main__":
     while True:
@@ -274,12 +277,11 @@ if __name__ == "__main__":
         try:
             pm.listen()
         except KeyboardInterrupt:
-            disp._handle_exception()
             pm.shutdown()
             break
         except OSError:
-            disp._handle_exception()
             sleep(POLE_TIME)
         except RuntimeError:
-            disp._handle_exception()
             sleep(POLE_TIME)
+        finally:
+            disp.turn_led_off()
