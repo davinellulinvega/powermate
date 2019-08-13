@@ -48,7 +48,7 @@ class Powermate(Observable):
                                 fn(event.value)
 
                     # Press
-                    if event.code == evdev.ecodes.BTN_0 and event.type == evdev.ecodes.EV_KEY:
+                    elif event.code == evdev.ecodes.BTN_0 and event.type == evdev.ecodes.EV_KEY:
                         if event.value == 1:  # Pressed
                             press_start = event.timestamp()
                             pressed = True
