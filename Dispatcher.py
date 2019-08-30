@@ -234,12 +234,11 @@ class Dispatcher:
         :return: Nothing.
         """
 
-        # Get the volume of the input sink
         with Pulse(threading_lock=True) as pulse:
+            # Get the volume of the input sink
             volume = pulse.volume_get_all_chans(sink_in)
 
-        # Get the main sink
-        with Pulse(threading_lock=True) as pulse:
+            # Get the main sink
             for sink in pulse.sink_list():
                 if sink.index == sink_in.sink:
                     main_vol = sink.volume.value_flat
