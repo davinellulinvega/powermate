@@ -247,7 +247,7 @@ class Dispatcher:
                 main_vol = 1
 
         # Declare a new notification
-        self._note.update("Volume", "{:.2%}".format(volume * main_vol), "/usr/share/icons/Faenza/apps/48/"
+        self._note.update("Volume", "{:.1%}".format(volume * main_vol), "/usr/share/icons/Faenza/apps/48/"
                                                                         "gnome-volume-control.png")
 
         # Show the notification
